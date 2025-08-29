@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Relatórios</h1>
+
+<div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white p-6 rounded-lg mb-6">
+  <h2 class="text-lg">Saldo Total Acumulado</h2>
+  <p class="text-3xl font-bold">R$ 0,00</p>
+  <p class="text-sm">Soma de todos os saldos mensais</p>
+</div>
+
+<!-- Cards -->
+<div class="grid grid-cols-4 gap-4 mb-6">
+  <div class="bg-green-50 p-4 rounded-lg shadow">
+    <p class="text-sm text-gray-500">Receitas do Mês</p>
+    <p class="text-2xl font-bold text-green-600">R$ 0,00</p>
+  </div>
+  <div class="bg-purple-50 p-4 rounded-lg shadow">
+    <p class="text-sm text-gray-500">Gastos Crédito</p>
+    <p class="text-2xl font-bold text-purple-600">R$ 0,00</p>
+  </div>
+  <div class="bg-red-50 p-4 rounded-lg shadow">
+    <p class="text-sm text-gray-500">Gastos Débito</p>
+    <p class="text-2xl font-bold text-red-600">R$ 0,00</p>
+  </div>
+  <div class="bg-blue-50 p-4 rounded-lg shadow">
+    <p class="text-sm text-gray-500">Saldo do Mês</p>
+    <p class="text-2xl font-bold text-blue-600">R$ 0,00</p>
+  </div>
+</div>
+
+<!-- Gráficos e Análises -->
+<div class="grid grid-cols-2 gap-6">
+  <div class="bg-white p-4 rounded-lg shadow">📊 Gastos por Categoria</div>
+  <div class="bg-white p-4 rounded-lg shadow">📈 Receitas por Categoria</div>
+  <div class="bg-white p-4 rounded-lg shadow">📑 Análise Detalhada</div>
+  <div class="bg-white p-4 rounded-lg shadow">📌 Resumo Financeiro</div>
+</div>
+{% endblock %}

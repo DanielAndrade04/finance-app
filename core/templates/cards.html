@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold">Cartões de Crédito</h1>
+  <button class="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">+ Novo Cartão</button>
+</div>
+
+<!-- Tabs -->
+<div class="flex space-x-6 border-b mb-6">
+  <button class="pb-2 border-b-2 border-purple-500 text-purple-600 font-semibold">Meus Cartões</button>
+  <button class="pb-2 text-gray-500 hover:text-gray-700">Faturas</button>
+</div>
+
+<!-- Cartão -->
+<div class="bg-white p-6 rounded-lg shadow w-80">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="font-bold text-purple-600">Nubank</h2>
+    <div class="flex space-x-2">
+      <button>✏️</button>
+      <button>🗑️</button>
+    </div>
+  </div>
+  <p>0 transações</p>
+  <p class="text-sm text-gray-500 mt-2">Abertura: Dia 1</p>
+  <p class="text-sm text-gray-500">Fechamento: Dia 31</p>
+  <a href="#" class="text-purple-600 mt-3 inline-block">📅 Fatura atual: Ago/2025</a>
+</div>
+{% endblock %}

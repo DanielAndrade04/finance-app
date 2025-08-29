@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Editar Transação</h1>
+
+<form method="post" class="space-y-4">
+  {% csrf_token %}
+
+  <div>
+    <label class="block font-semibold mb-2">Descrição</label>
+    <input type="text" name="descricao" value="{{ transacao.description }}" class="w-full border rounded-md p-3">
+  </div>
+
+  <div>
+    <label class="block font-semibold mb-2">Valor</label>
+    <input type="text" name="valor" value="{{ transacao.value }}" class="w-full border rounded-md p-3">
+  </div>
+
+  <div>
+    <label class="block font-semibold mb-2">Data</label>
+    <input type="date" name="data" value="{{ transacao.date|date:'Y-m-d' }}" class="w-full border rounded-md p-3">
+  </div>
+
+  <div>
+    <label class="block font-semibold mb-2">Tipo</label>
+    <select name="tipo" class="w-full border rounded-md p-3">
+      <option value="receita" {% if transacao.transaction_type == "receita" %}selected{% endif %}>Receita</option>
+      <option value="gasto" {% if transacao.transaction_type == "gasto" %}selected{% endif %}>Gasto</option>
+    </select>
+  </div>
+
+  <div>
+    <label class="block font-semibold mb-2">Categoria</label>
+    <select name="categoria" class="w-full border rounded-md p-3">
+      <option value="alimentacao" {% if transacao.category == "alimentacao" %}selected{% endif %}>Alimentação</option>
+      <option value="transporte" {% if transacao.category == "transporte" %}selected{% endif %}>Transporte</option>
+      <option value="salario" {% if transacao.category == "salario" %}selected{% endif %}>Salário</option>
+    </select>
+  </div>
+
+  <div>
+    <label class="block font-semibold mb-2">Pagamento</label>
+    <select name="pagamento" class="w-full border rounded-md p-3">
+      <option value="debito" {% if transacao.payment_method == "debito" %}selected{% endif %}>Débito</option>
+      <option value="credito" {% if transacao.payment_method == "credito" %}selected{% endif %}>Crédito</option>
+    </select>
+  </div>
+
+  <button type="submit" class="bg-blue-500 text-white rounded-md p-3">Salvar Alterações</button>
+  <a href="{% url 'historical' %}" class="bg-gray-500 text-white rounded-md p-3 ml-2">Cancelar</a>
+</form>
+{% endblock %}

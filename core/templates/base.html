@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>FinanceApp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .sort-arrow {
+        display: inline-block;
+        width: 0;
+        height: 0;
+        margin-left: 5px;
+        vertical-align: middle;
+    }
+
+    .sort-arrow.asc {
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-bottom: 4px solid #000;
+    }
+
+    .sort-arrow.desc {
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 4px solid #000;
+    }
+
+    .sort-arrow.none {
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 4px solid #ccc;
+    }
+
+    /* Estilos para os ícones de ação */
+    .action-icon {
+        transition: all 0.2s ease;
+    }
+
+    .action-icon:hover {
+        transform: scale(1.1);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <div class="flex h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r shadow-md flex flex-col">
+      <div class="p-4 font-bold text-xl text-blue-600">FinanceApp</div>
+      <nav class="flex-1">
+        <ul>
+          <li><a href="{% url 'dashboard' %}" class="block p-3 hover:bg-blue-100">📊 Dashboard</a></li>
+          <li><a href="{% url 'new_transaction' %}" class="block p-3 hover:bg-blue-100">➕ Nova Transação</a></li>
+          <li><a href="{% url 'historical' %}" class="block p-3 hover:bg-blue-100">📜 Histórico</a></li>
+          <li><a href="{% url 'reports' %}" class="block p-3 hover:bg-blue-100">📈 Relatórios</a></li>
+          <li><a href="{% url 'cards' %}" class="block p-3 hover:bg-blue-100">💳 Cartões</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Conteúdo -->
+    <main class="flex-1 p-6 overflow-y-auto">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <script>
+    // Função para gerenciar ordenação e filtros
+    function initSorting() {
+      const filterForm = document.querySelector('form');
+      if (filterForm) {
+        // Adiciona os campos hidden de ordenação ao formulário de filtro
+        const orderByInput = document.createElement('input');
+        orderByInput.type = 'hidden';
+        orderByInput.name = 'order_by';
+        orderByInput.value = '{{ order_by|default:"data" }}';
+
+        const directionInput = document.createElement('input');
+        directionInput.type = 'hidden';
+        directionInput.name = 'direction';
+        directionInput.value = '{{ direction|default:"desc" }}';
+
+        filterForm.appendChild(orderByInput);
+        filterForm.appendChild(directionInput);
+      }
+    }
+
+    // Inicializa quando o documento estiver pronto
+    document.addEventListener('DOMContentLoaded', initSorting);
+  </script>
+</body>
+</html>

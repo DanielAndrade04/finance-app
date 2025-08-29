@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold">Dashboard</h1>
+  <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">🔄 Sync</button>
+</div>
+
+<!-- Cards principais -->
+<div class="grid grid-cols-4 gap-4 mb-6">
+  <div class="bg-blue-50 p-4 rounded-lg shadow">
+    <p class="text-sm text-gray-500">Saldo Total do Mês</p>
+    <p class="text-2xl font-bold text-blue-600">R$ 0,00</p>
+  </div>
+  <div class="bg-green-50 p-4 rounded-lg shadow">
+    <p class="text-sm text-gray-500">Receitas</p>
+    <p class="text-2xl font-bold text-green-600">R$ 0,00</p>
+  </div>
+  <div class="bg-purple-50 p-4 rounded-lg shadow">
+    <p class="text-sm text-gray-500">Gastos Crédito</p>
+    <p class="text-2xl font-bold text-purple-600">R$ 0,00</p>
+  </div>
+  <div class="bg-red-50 p-4 rounded-lg shadow">
+    <p class="text-sm text-gray-500">Gastos Débito</p>
+    <p class="text-2xl font-bold text-red-600">R$ 0,00</p>
+  </div>
+</div>
+
+<!-- Informações extras -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+  <div class="bg-white p-4 rounded-lg shadow">Receitas do Mês<br><span class="text-gray-500">Nenhuma receita</span></div>
+  <div class="bg-white p-4 rounded-lg shadow">Gastos Recentes<br><span class="text-gray-500">Nenhum gasto</span></div>
+  <div class="bg-white p-4 rounded-lg shadow">Próximas Faturas<br><span class="text-gray-500">Nenhuma fatura</span></div>
+</div>
+
+<!-- Resumo -->
+<div class="bg-white p-4 rounded-lg shadow">
+  <h2 class="font-bold mb-2">Resumo de Pagamentos</h2>
+  <div class="flex justify-between">
+    <span class="text-red-600">Gastos Débito</span> <span>R$ 0,00</span>
+  </div>
+  <div class="flex justify-between">
+    <span class="text-purple-600">Gastos Crédito</span> <span>R$ 0,00</span>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Nova Transação</h1>
+
+<form method="post" action="{% url 'criar_transacao' %}" onsubmit="return validarForm();" class="space-y-6">
+  {% csrf_token %}
+
+  <!-- Tipo de Transação -->
+  <div>
+    <label class="block font-semibold mb-2">Tipo de Transação</label>
+    <input type="hidden" name="tipo" id="tipo">
+    <div class="flex space-x-4">
+      <button type="button" onclick="selectOption('tipo','receita', this)"
+              class="tipo-btn flex-1 border p-3 rounded-md text-center hover:bg-green-50">
+        💰 Receita
+      </button>
+      <button type="button" onclick="selectOption('tipo','gasto', this)"
+              class="tipo-btn flex-1 border p-3 rounded-md text-center hover:bg-red-50">
+        💸 Gasto
+      </button>
+    </div>
+  </div>
+
+  <!-- Descrição -->
+  <div>
+    <label class="block font-semibold mb-2">Descrição</label>
+    <input type="text" name="descricao" class="w-full border rounded-md p-3">
+  </div>
+
+  <!-- Valor -->
+  <div>
+    <label class="block font-semibold mb-2">Valor *</label>
+    <input type="text" name="valor" class="w-full border rounded-md p-3" required id="valorInput" value="R$ 0,00">
+  </div>
+
+  <script>
+    const input = document.getElementById('valorInput');
+
+    // Função para formatar número como moeda brasileira
+    function formatarMoeda(valor) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      }).format(valor);
+    }
+
+    // Evento de digitação
+    input.addEventListener('input', function (e) {
+      let valor = e.target.value.replace(/\D/g, '');
+
+      // Se o campo estiver vazio, volta para R$ 0,00
+      if (!valor) {
+        e.target.value = formatarMoeda(0);
+        return;
+      }
+
+      valor = (parseInt(valor, 10) / 100).toFixed(2);
+      e.target.value = formatarMoeda(valor);
+    });
+
+    // Impede digitação de caracteres não numéricos
+    input.addEventListener('keypress', function (e) {
+      const charCode = e.which ? e.which : e.keyCode;
+      if (charCode < 48 || charCode > 57) {
+        e.preventDefault();
+      }
+    });
+
+    // Se o campo perder o foco e estiver vazio, volta para R$ 0,00
+    input.addEventListener('blur', function (e) {
+      if (!e.target.value.trim()) {
+        e.target.value = formatarMoeda(0);
+      }
+    });
+  </script>
+
+
+  <!-- Método de Pagamento (só mostra se for gasto) -->
+  <div id="metodo-pagamento" style="display:none;">
+    <label class="block font-semibold mb-2">Método de Pagamento</label>
+    <input type="hidden" name="metodo_pagamento" id="metodo_pagamento">
+    <div class="flex space-x-4">
+      <button type="button" onclick="selectOption('metodo_pagamento','debito', this)"
+              class="metodo-btn flex-1 border p-3 rounded-md text-center hover:bg-blue-50">Débito</button>
+      <button type="button" onclick="selectOption('metodo_pagamento','credito', this)"
+              class="metodo-btn flex-1 border p-3 rounded-md text-center hover:bg-purple-50">Crédito</button>
+    </div>
+  </div>
+
+  <!-- Categoria -->
+  <div>
+    <label class="block font-semibold mb-2">Categoria *</label>
+    <input type="hidden" name="categoria" id="categoria">
+    <div class="grid grid-cols-3 gap-4" id="categoria-container">
+      <!--Categoria de Gastos-->
+      <button type="button" data-type="gasto" onclick="selectOption('categoria','alimentacao', this)" class="categoria-btn border p-3 rounded-md">🍽️ Alimentação</button>
+      <button type="button" data-type="gasto" onclick="selectOption('categoria','transporte', this)" class="categoria-btn border p-3 rounded-md">🚗 Transporte</button>
+      <button type="button" data-type="gasto" onclick="selectOption('categoria','moradia', this)" class="categoria-btn border p-3 rounded-md">🏠 Moradia</button>
+      <button type="button" data-type="gasto" onclick="selectOption('categoria','saude', this)" class="categoria-btn border p-3 rounded-md">❤️ Saúde</button>
+      <button type="button" data-type="gasto" onclick="selectOption('categoria','educacao', this)" class="categoria-btn border p-3 rounded-md">📚 Educação</button>
+      <button type="button" data-type="gasto" onclick="selectOption('categoria','lazer', this)" class="categoria-btn border p-3 rounded-md">🎉 Lazer</button>
+      <button type="button" data-type="gasto" onclick="selectOption('categoria','compras', this)" class="categoria-btn border p-3 rounded-md">🛍️ Compras</button>
+      <button type="button" data-type="gasto" onclick="selectOption('categoria','contas', this)" class="categoria-btn border p-3 rounded-md">🧾 Contas</button>
+      <button type="button" data-type="gasto" onclick="selectOption('categoria','outros_gastos', this)" class="categoria-btn border p-3 rounded-md">➖ Outros Gastos</button>
+
+      <!--Categoria de Receitas-->
+      <button type="button" data-type="receita" onclick="selectOption('categoria','salario', this)" class="categoria-btn border p-3 rounded-md">💼 Salário</button>
+      <button type="button" data-type="receita" onclick="selectOption('categoria','bonus', this)" class="categoria-btn border p-3 rounded-md">🎁 Bônus</button>
+      <button type="button" data-type="receita" onclick="selectOption('categoria','freelance', this)" class="categoria-btn border p-3 rounded-md">💻 Freelance</button>
+      <button type="button" data-type="receita" onclick="selectOption('categoria','investimentos', this)" class="categoria-btn border p-3 rounded-md">📈 Investimentos</button>
+      <button type="button" data-type="receita" onclick="selectOption('categoria','vale_alimentacao', this)" class="categoria-btn border p-3 rounded-md">🍽️ Vale Alimentação</button>
+      <button type="button" data-type="receita" onclick="selectOption('categoria','outras_receitas', this)" class="categoria-btn border p-3 rounded-md">➕ Outras Receitas</button>
+    </div>
+  </div>
+
+  <!-- Data -->
+  <div>
+    <label class="block font-semibold mb-2">Data *</label>
+    <input type="date" name="data" class="w-full border rounded-md p-3" required>
+  </div>
+
+  <div>
+    <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+      Salvar Transação
+    </button>
+  </div>
+</form>
+
+<script>
+  function selectOption(field, value, el) {
+    document.getElementById(field).value = value;
+
+    // limpa seleção visual do grupo
+    let selector = '';
+    if (field === 'tipo') selector = '.tipo-btn';
+    if (field === 'metodo_pagamento') selector = '.metodo-btn';
+    if (field === 'categoria') selector = '.categoria-btn';
+    document.querySelectorAll(selector).forEach(btn => btn.classList.remove('bg-blue-200','ring-2','ring-blue-500'));
+
+    // aplica destaque no selecionado
+    el.classList.add('bg-blue-200','ring-2','ring-blue-500');
+
+    // mostra/oculta método de pagamento conforme tipo
+    if (field === 'tipo') {
+      const mp = document.getElementById('metodo-pagamento');
+      if (value === 'gasto') {
+        mp.style.display = 'block';
+      } else {
+        mp.style.display = 'none';
+        document.getElementById('metodo_pagamento').value = '';
+        document.querySelectorAll('.metodo-btn').forEach(btn => btn.classList.remove('bg-blue-200','ring-2','ring-blue-500'));
+      }
+
+      // filtra categorias conforme tipo
+      filtrarCategorias(value);
+    }
+  }
+
+  function filtrarCategorias(tipo) {
+    const botoes = document.querySelectorAll("#categoria-container button");
+    botoes.forEach(btn => {
+      if (btn.getAttribute("data-type") === tipo) {
+        btn.style.display = "block";
+      } else {
+        btn.style.display = "none";
+      }
+    });
+
+    // limpa categoria selecionada se trocar o tipo
+    document.getElementById('categoria').value = '';
+    document.querySelectorAll('.categoria-btn').forEach(btn => btn.classList.remove('bg-blue-200','ring-2','ring-blue-500'));
+  }
+
+  function validarForm() {
+    const tipo = document.getElementById('tipo').value;
+    const cat  = document.getElementById('categoria').value;
+    const met  = document.getElementById('metodo_pagamento').value;
+
+    if (!tipo) { alert('Selecione o tipo (Receita ou Gasto).'); return false; }
+    if (!cat)  { alert('Selecione uma categoria.'); return false; }
+    if (tipo === 'gasto' && !met) { alert('Selecione o método de pagamento.'); return false; }
+    return true;
+  }
+</script>
+{% endblock %}
