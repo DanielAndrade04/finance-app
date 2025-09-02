@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Novo Cartão de Crédito</h1>
+
+<form method="post" class="space-y-6">
+  {% csrf_token %}
+  
+  <div>
+    <label class="block font-semibold mb-2">Nome do Cartão</label>
+    <input type="text" name="name" class="w-full border rounded-md p-3" required>
+  </div>
+  
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block font-semibold mb-2">Dia de Fechamento</label>
+      <input type="number" name="closing_day" min="1" max="31" class="w-full border rounded-md p-3" required>
+    </div>
+    
+    <div>
+      <label class="block font-semibold mb-2">Dia de Vencimento</label>
+      <input type="number" name="due_day" min="1" max="31" class="w-full border rounded-md p-3" required>
+    </div>
+  </div>
+  
+  <div>
+    <label class="block font-semibold mb-2">Limite</label>
+    <input type="text" name="limit" class="w-full border rounded-md p-3" value="R$ 0,00" id="limiteInput">
+  </div>
+  
+  <div class="flex space-x-4">
+    <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+      Salvar Cartão
+    </button>
+    <a href="{% url 'cards' %}" class="px-6 py-3 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+      Cancelar
+    </a>
+  </div>
+</form>
+
+<script>
+  // Script similar ao de formatação de valor para o limite
+  const limiteInput = document.getElementById('limiteInput');
+  limiteInput.addEventListener('input', formatarMoeda);
+</script>
+{% endblock %}

@@ -39,6 +39,26 @@
     .action-icon:hover {
         transform: scale(1.1);
     }
+
+    /* Melhora a aparência dos selects */
+    select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23333'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    }
+
+    /* Estilo para os cartões */
+    .card-item {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">

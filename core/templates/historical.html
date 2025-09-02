@@ -4,33 +4,154 @@
 
 <h1 class="text-2xl font-bold mb-6">Histórico de Transações</h1>
 
-<!-- Mensagens -->
-{% if messages %}
-<div class="mb-4">
-  {% for message in messages %}
-  <div class="p-3 rounded-md {% if message.tags == 'success' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-    {{ message }}
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
-
 <!-- Filtros -->
 <form method="get" class="space-y-4 mb-6">
-  <!-- ... (seus filtros existentes) ... -->
+
+  <!-- Filtro de Mês/Ano -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+    <div>
+      <label class="block font-semibold mb-2">Mês</label>
+      <select name="mes" class="w-full border rounded-md p-3">
+        {% for mes_num, mes_nome in meses_disponiveis %}
+        <option value="{{ mes_num }}" {% if mes_num == mes_selecionado %}selected{% endif %}>
+          {{ mes_nome }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label class="block font-semibold mb-2">Ano</label>
+      <select name="ano" class="w-full border rounded-md p-3">
+        {% for ano_option in anos_disponiveis %}
+        <option value="{{ ano_option }}" {% if ano_option == ano_selecionado %}selected{% endif %}>
+          {{ ano_option }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="flex items-end">
+      <button type="submit" class="w-full bg-blue-500 text-white rounded-md p-3">
+        Filtrar
+      </button>
+    </div>
+  </div>
+
+  <!-- Campo de busca -->
+  <div>
+    <input
+      type="text"
+      name="busca"
+      placeholder="Buscar por descrição..."
+      value="{{ request.GET.busca }}"
+      class="w-full border rounded-md p-3"
+    >
+  </div>
+
+  <!-- Filtros abaixo -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+    <div>
+      <label class="block font-semibold mb-2">Tipo</label>
+      <select name="tipo" class="w-full border rounded-md p-3">
+        <option value="todos">Todos</option>
+        <option value="receita" {% if request.GET.tipo == "receita" %}selected{% endif %}>Receitas</option>
+        <option value="gasto" {% if request.GET.tipo == "gasto" %}selected{% endif %}>Gastos</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block font-semibold mb-2">Categoria</label>
+      <select name="categoria" class="w-full border rounded-md p-3">
+        <option value="todas">Todas</option>
+        <option value="alimentacao" {% if request.GET.categoria == "alimentacao" %}selected{% endif %}>Alimentação</option>
+        <option value="transporte" {% if request.GET.categoria == "transporte" %}selected{% endif %}>Transporte</option>
+        <option value="salario" {% if request.GET.categoria == "salario" %}selected{% endif %}>Salário</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block font-semibold mb-2">Pagamento</label>
+      <select name="pagamento" class="w-full border rounded-md p-3">
+        <option value="todos">Todos</option>
+        <option value="debito" {% if request.GET.pagamento == "debito" %}selected{% endif %}>Débito</option>
+        <option value="credito" {% if request.GET.pagamento == "credito" %}selected{% endif %}>Crédito</option>
+      </select>
+    </div>
+
+    <div class="flex items-end">
+      <button type="submit" class="w-full bg-green-500 text-white rounded-md p-3">
+        Aplicar Filtros
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Campos hidden para manter a ordenação -->
+  <input type="hidden" name="order_by" value="{{ order_by }}">
+  <input type="hidden" name="direction" value="{{ direction }}">
 </form>
+
+<!-- Indicador do período selecionado -->
+<div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+  <p class="text-blue-800 font-semibold">
+    Mostrando transações de: <span class="capitalize">
+      {{ meses_disponiveis|get_item:mes_selecionado }} de {{ ano_selecionado }}
+    </span>
+  </p>
+  <p class="text-blue-600 text-sm">
+    {{ paginator.count }} transação{{ paginator.count|pluralize }} encontrada{{ paginator.count|pluralize }}
+  </p>
+</div>
 
 <!-- Lista de transações -->
 {% if transactions %}
   <table class="w-full bg-white shadow rounded-md">
     <thead>
       <tr class="bg-gray-100 text-left">
-        <th class="p-3">Descrição</th>
-        <th class="p-3">Valor</th>
-        <th class="p-3">Data</th>
-        <th class="p-3">Tipo</th>
-        <th class="p-3">Categoria</th>
-        <th class="p-3">Pagamento</th>
+        <th class="p-3">
+          <a href="?{% if query_string %}{{ query_string }}&{% endif %}order_by=descricao&direction={% if order_by == 'descricao' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="flex items-center">
+            Descrição
+            <span class="sort-arrow {% if order_by == 'descricao' %}{% if direction == 'asc' %}asc{% else %}desc{% endif %}{% else %}none{% endif %}"></span>
+          </a>
+        </th>
+
+        <th class="p-3">
+          <a href="?{% if query_string %}{{ query_string }}&{% endif %}order_by=valor&direction={% if order_by == 'valor' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="flex items-center">
+            Valor
+            <span class="sort-arrow {% if order_by == 'valor' %}{% if direction == 'asc' %}asc{% else %}desc{% endif %}{% else %}none{% endif %}"></span>
+          </a>
+        </th>
+
+        <th class="p-3">
+          <a href="?{% if query_string %}{{ query_string }}&{% endif %}order_by=data&direction={% if order_by == 'data' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="flex items-center">
+            Data
+            <span class="sort-arrow {% if order_by == 'data' %}{% if direction == 'asc' %}asc{% else %}desc{% endif %}{% else %}none{% endif %}"></span>
+          </a>
+        </th>
+
+        <th class="p-3">
+          <a href="?{% if query_string %}{{ query_string }}&{% endif %}order_by=tipo&direction={% if order_by == 'tipo' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="flex items-center">
+            Tipo
+            <span class="sort-arrow {% if order_by == 'tipo' %}{% if direction == 'asc' %}asc{% else %}desc{% endif %}{% else %}none{% endif %}"></span>
+          </a>
+        </th>
+
+        <th class="p-3">
+          <a href="?{% if query_string %}{{ query_string }}&{% endif %}order_by=categoria&direction={% if order_by == 'categoria' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="flex items-center">
+            Categoria
+            <span class="sort-arrow {% if order_by == 'categoria' %}{% if direction == 'asc' %}asc{% else %}desc{% endif %}{% else %}none{% endif %}"></span>
+          </a>
+        </th>
+
+        <th class="p-3">
+          <a href="?{% if query_string %}{{ query_string }}&{% endif %}order_by=pagamento&direction={% if order_by == 'pagamento' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="flex items-center">
+            Pagamento
+            <span class="sort-arrow {% if order_by == 'pagamento' %}{% if direction == 'asc' %}asc{% else %}desc{% endif %}{% else %}none{% endif %}"></span>
+          </a>
+        </th>
+
         <th class="p-3">Ações</th>
       </tr>
     </thead>
@@ -44,10 +165,10 @@
         <td class="p-3">{{ t.categoria }}</td>
         <td class="p-3">{{ t.pagamento }}</td>
         <td class="p-3">
-          <div class="flex space-x-3">
+          <div class="flex space-x-2">
             <!-- Ícone de Editar -->
             <a href="{% url 'edit_transaction' t.id %}"
-               class="text-blue-500 hover:text-blue-700 action-icon"
+               class="text-blue-500 hover:text-blue-700"
                title="Editar transação">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -56,7 +177,7 @@
 
             <!-- Ícone de Deletar -->
             <a href="{% url 'delete_transaction' t.id %}"
-               class="text-red-500 hover:text-red-700 action-icon"
+               class="text-red-500 hover:text-red-700"
                title="Excluir transação"
                onclick="return confirm('Tem certeza que deseja excluir esta transação?');">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -70,7 +191,7 @@
     </tbody>
   </table>
 
-  <!-- Paginação -->
+  <!-- Paginação com manutenção dos parâmetros -->
   <div class="flex justify-center mt-4 space-x-2">
     {% if page_obj.has_previous %}
       <a href="?{% if query_string %}{{ query_string }}&{% endif %}page={{ page_obj.previous_page_number }}"
@@ -89,7 +210,7 @@
 
 {% else %}
   <div class="bg-white rounded-md shadow p-6 text-center text-gray-500">
-    Nenhuma transação encontrada
+    Nenhuma transação encontrada para {{ meses_disponiveis|get_item:mes_selecionado }} de {{ ano_selecionado }}
   </div>
 {% endif %}
 {% endblock %}

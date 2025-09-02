@@ -2,7 +2,7 @@
 {% block content %}
 <h1 class="text-2xl font-bold mb-6">Editar Transação</h1>
 
-<form method="post" class="space-y-4">
+<form method="post" class="space-y-6">
   {% csrf_token %}
 
   <div>
@@ -12,7 +12,7 @@
 
   <div>
     <label class="block font-semibold mb-2">Valor</label>
-    <input type="text" name="valor" value="{{ transacao.value }}" class="w-full border rounded-md p-3">
+    <input type="text" name="valor" value="R$ {{ transacao.value }}" class="w-full border rounded-md p-3" id="valorInput">
   </div>
 
   <div>
@@ -28,24 +28,93 @@
     </select>
   </div>
 
-  <div>
-    <label class="block font-semibold mb-2">Categoria</label>
-    <select name="categoria" class="w-full border rounded-md p-3">
-      <option value="alimentacao" {% if transacao.category == "alimentacao" %}selected{% endif %}>Alimentação</option>
-      <option value="transporte" {% if transacao.category == "transporte" %}selected{% endif %}>Transporte</option>
-      <option value="salario" {% if transacao.category == "salario" %}selected{% endif %}>Salário</option>
-    </select>
-  </div>
-
-  <div>
-    <label class="block font-semibold mb-2">Pagamento</label>
+  <div id="metodo-pagamento">
+    <label class="block font-semibold mb-2">Método de Pagamento</label>
     <select name="pagamento" class="w-full border rounded-md p-3">
       <option value="debito" {% if transacao.payment_method == "debito" %}selected{% endif %}>Débito</option>
       <option value="credito" {% if transacao.payment_method == "credito" %}selected{% endif %}>Crédito</option>
     </select>
   </div>
 
-  <button type="submit" class="bg-blue-500 text-white rounded-md p-3">Salvar Alterações</button>
-  <a href="{% url 'historical' %}" class="bg-gray-500 text-white rounded-md p-3 ml-2">Cancelar</a>
+  <!-- Campo de Cartão de Crédito (só mostra se for crédito) -->
+  <div id="cartao-credito" {% if transacao.payment_method != 'credito' %}style="display:none;"{% endif %}>
+    <label class="block font-semibold mb-2">Cartão de Crédito</label>
+    <select name="cartao_credito" class="w-full border rounded-md p-3">
+      <option value="">Selecione o cartão</option>
+      {% for cartao in cartoes %}
+      <option value="{{ cartao.id }}" {% if transacao.credit_card and transacao.credit_card.id == cartao.id %}selected{% endif %}>
+        {{ cartao.name }} (Fecha dia {{ cartao.closing_day }})
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div>
+    <label class="block font-semibold mb-2">Categoria</label>
+    <select name="categoria" class="w-full border rounded-md p-3">
+      <option value="alimentacao" {% if transacao.category == "alimentacao" %}selected{% endif %}>Alimentação</option>
+      <option value="transporte" {% if transacao.category == "transporte" %}selected{% endif %}>Transporte</option>
+      <option value="salario" {% if transacao.category == "salario" %}selected{% endif %}>Salário</option>
+      <!-- Adicione outras categorias conforme necessário -->
+    </select>
+  </div>
+
+  <div class="flex space-x-4">
+    <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+      Salvar Alterações
+    </button>
+    <a href="{% url 'historical' %}" class="px-6 py-3 bg-gray-500 text-white rounded-md hover:bg-gray-600">
+      Cancelar
+    </a>
+  </div>
 </form>
+
+<script>
+  // Script para mostrar/ocultar campo de cartão baseado no método de pagamento
+  document.addEventListener('DOMContentLoaded', function() {
+    const metodoSelect = document.querySelector('select[name="pagamento"]');
+    const cartaoDiv = document.getElementById('cartao-credito');
+
+    metodoSelect.addEventListener('change', function() {
+      if (this.value === 'credito') {
+        cartaoDiv.style.display = 'block';
+      } else {
+        cartaoDiv.style.display = 'none';
+        document.querySelector('select[name="cartao_credito"]').value = '';
+      }
+    });
+
+    // Formatação do valor
+    const valorInput = document.getElementById('valorInput');
+    if (valorInput) {
+      valorInput.addEventListener('input', function(e) {
+        let valor = e.target.value.replace(/\D/g, '');
+        if (!valor) {
+          e.target.value = 'R$ 0,00';
+          return;
+        }
+        valor = (parseInt(valor, 10) / 100).toFixed(2);
+        e.target.value = new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        }).format(valor);
+      });
+    }
+  });
+
+  function validarFormEdicao() {
+    const metodo = document.querySelector('select[name="pagamento"]').value;
+    const cartao = document.querySelector('select[name="cartao_credito"]').value;
+
+    if (metodo === 'credito' && !cartao) {
+      alert('Para transações no crédito, selecione um cartão.');
+      return false;
+    }
+
+    return true;
+  }
+
+  // Adicione onsubmit="return validarFormEdicao();" no form
+  document.querySelector('form').onsubmit = validarFormEdicao;
+</script>
 {% endblock %}

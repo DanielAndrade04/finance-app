@@ -87,6 +87,17 @@
     </div>
   </div>
 
+  <!-- Cartão de Crédito (só mostra se for crédito) -->
+  <div id="cartao-credito" style="display:none;">
+      <label class="block font-semibold mb-2">Cartão de Crédito</label>
+      <select name="cartao_credito" class="w-full border rounded-md p-3">
+          <option value="">Selecione o cartão</option>
+          {% for cartao in cartoes %}
+          <option value="{{ cartao.id }}">{{ cartao.name }} (Fecha dia {{ cartao.closing_day }})</option>
+          {% endfor %}
+      </select>
+  </div>
+
   <!-- Categoria -->
   <div>
     <label class="block font-semibold mb-2">Categoria *</label>
@@ -149,10 +160,25 @@
         mp.style.display = 'none';
         document.getElementById('metodo_pagamento').value = '';
         document.querySelectorAll('.metodo-btn').forEach(btn => btn.classList.remove('bg-blue-200','ring-2','ring-blue-500'));
+
+        // Esconde cartão de crédito também se mudar para receita
+        document.getElementById('cartao-credito').style.display = 'none';
+        document.querySelector('select[name="cartao_credito"]').value = '';
       }
 
       // filtra categorias conforme tipo
       filtrarCategorias(value);
+    }
+
+    // MOSTRA/OCULTA CARTÃO DE CRÉDITO CONFORME MÉTODO DE PAGAMENTO
+    if (field === 'metodo_pagamento') {
+      const cartao = document.getElementById('cartao-credito');
+      if (value === 'credito') {
+        cartao.style.display = 'block';
+      } else {
+        cartao.style.display = 'none';
+        document.querySelector('select[name="cartao_credito"]').value = '';
+      }
     }
   }
 
@@ -175,10 +201,18 @@
     const tipo = document.getElementById('tipo').value;
     const cat  = document.getElementById('categoria').value;
     const met  = document.getElementById('metodo_pagamento').value;
+    const cartao = document.querySelector('select[name="cartao_credito"]').value;
 
     if (!tipo) { alert('Selecione o tipo (Receita ou Gasto).'); return false; }
     if (!cat)  { alert('Selecione uma categoria.'); return false; }
     if (tipo === 'gasto' && !met) { alert('Selecione o método de pagamento.'); return false; }
+
+    // Validação adicional para cartão de crédito
+    if (met === 'credito' && !cartao) {
+      alert('Selecione o cartão de crédito.');
+      return false;
+    }
+
     return true;
   }
 </script>

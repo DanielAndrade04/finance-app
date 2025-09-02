@@ -21,10 +21,13 @@ class GoogleSheetsService:
         except gspread.WorksheetNotFound:
             return spreadsheet.add_worksheet(title=sheet_name, rows="100", cols="10")
 
-    def save_transaction(self, transaction):
+    def save_transaction(self, transaction, year=None, month=None):
         """Salva uma transação no mês correspondente"""
-        year = transaction.date.year
-        month = transaction.date.month
+        if year is None:
+            year = transaction.date.year
+        if month is None:
+            month = transaction.date.month
+
         worksheet = self.get_or_create_sheet(year, month)
 
         # Cabeçalho (se estiver vazio)
@@ -47,15 +50,16 @@ class GoogleSheetsService:
 
     def update_transaction(self, transaction):
         """Atualiza uma transação existente no Google Sheets"""
-        year = transaction.date.year
-        month = transaction.date.month
-
         try:
+            # Determina em qual planilha a transação está
+            year = transaction.billing_year if transaction.billing_year else transaction.date.year
+            month = transaction.billing_month if transaction.billing_month else transaction.date.month
+
             worksheet = self.get_or_create_sheet(year, month)
             records = worksheet.get_all_records()
 
             # Encontra a linha pelo ID
-            for i, record in enumerate(records, start=2):  # start=2 porque a linha 1 é cabeçalho
+            for i, record in enumerate(records, start=2):
                 if record.get("ID") == transaction.id:
                     # Atualiza a linha
                     worksheet.update(f"A{i}:H{i}", [[
@@ -93,8 +97,8 @@ class GoogleSheetsService:
 
     def get_transactions(self, year, month):
         """Retorna todas transações de um mês"""
-        sheet_name = f"{month:02d}-{year}"
         try:
+            sheet_name = f"{month:02d}-{year}"
             sheet = self.client.open("Financeiro").worksheet(sheet_name)
             data = sheet.get_all_records()
 
@@ -111,15 +115,18 @@ class GoogleSheetsService:
 
                 transactions.append({
                     "id": row.get("ID"),
-                    "descricao": row.get("Descrição"),
+                    "descricao": row.get("Descrição", ""),
                     "valor": valor_formatado,
-                    "tipo": row.get("Tipo"),
-                    "categoria": row.get("Categoria"),
-                    "pagamento": row.get("Método Pagamento"),
-                    "data": row.get("Data"),
-                    "data_registro": row.get("Data Registro"),
+                    "tipo": row.get("Tipo", ""),
+                    "categoria": row.get("Categoria", ""),
+                    "pagamento": row.get("Método Pagamento", ""),
+                    "data": row.get("Data", ""),
+                    "data_registro": row.get("Data Registro", ""),
                 })
             return transactions
+        except gspread.WorksheetNotFound:
+            print(f"Planilha {month:02d}-{year} não encontrada")
+            return []
         except Exception as e:
             print(f"Erro ao buscar transações: {e}")
             return []
@@ -137,3 +144,45 @@ class GoogleSheetsService:
         except Exception as e:
             print(f"Erro ao buscar transação: {e}")
             return None
+
+    def move_transaction(self, transaction, old_year, old_month, new_year, new_month):
+        """
+        Move uma transação de uma planilha para outra
+        """
+        try:
+            # Remove da planilha antiga
+            old_worksheet = self.get_or_create_sheet(old_year, old_month)
+            old_records = old_worksheet.get_all_records()
+
+            for i, record in enumerate(old_records, start=2):
+                if record.get("ID") == transaction.id:
+                    old_worksheet.delete_rows(i)
+                    break
+
+            # Adiciona na nova planilha
+            new_worksheet = self.get_or_create_sheet(new_year, new_month)
+
+            # Verifica se a nova planilha tem cabeçalho
+            if not new_worksheet.row_values(1):
+                new_worksheet.append_row([
+                    "ID", "Valor", "Tipo", "Descrição",
+                    "Método Pagamento", "Categoria", "Data", "Data Registro"
+                ])
+
+            # Adiciona a transação na nova planilha
+            new_worksheet.append_row([
+                transaction.id,
+                float(transaction.value),
+                transaction.transaction_type,
+                transaction.description,
+                transaction.payment_method,
+                transaction.category,
+                str(transaction.date),
+                str(transaction.date_added)
+            ])
+
+            return True
+
+        except Exception as e:
+            print(f"Erro ao mover transação: {e}")
+            return False
