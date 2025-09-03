@@ -38,39 +38,52 @@
 
     // Função para formatar número como moeda brasileira
     function formatarMoeda(valor) {
+      // Converte para número
+      let numero = parseFloat(valor);
+      if (isNaN(numero)) numero = 0;
+
+      // Formata como moeda brasileira
       return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
-        currency: 'BRL'
-      }).format(valor);
+        currency: 'BRL',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(numero);
     }
 
-    // Evento de digitação
+    // Evento de digitação - CORRIGIDO
     input.addEventListener('input', function (e) {
+      // Remove tudo que não é dígito
       let valor = e.target.value.replace(/\D/g, '');
 
-      // Se o campo estiver vazio, volta para R$ 0,00
+      // Se estiver vazio, define como zero
       if (!valor) {
         e.target.value = formatarMoeda(0);
         return;
       }
 
-      valor = (parseInt(valor, 10) / 100).toFixed(2);
-      e.target.value = formatarMoeda(valor);
+      // Converte para número dividindo por 100 (centavos)
+      let numero = parseInt(valor, 10) / 100;
+
+      // Formata como moeda
+      e.target.value = formatarMoeda(numero);
     });
 
-    // Impede digitação de caracteres não numéricos
-    input.addEventListener('keypress', function (e) {
-      const charCode = e.which ? e.which : e.keyCode;
-      if (charCode < 48 || charCode > 57) {
-        e.preventDefault();
-      }
-    });
-
-    // Se o campo perder o foco e estiver vazio, volta para R$ 0,00
+    // Quando o campo perde o foco, garante a formatação correta
     input.addEventListener('blur', function (e) {
-      if (!e.target.value.trim()) {
+      if (!e.target.value.trim() || e.target.value === 'R$ 0,00') {
         e.target.value = formatarMoeda(0);
+      } else {
+        // Re-formata para garantir padrão correto
+        let valor = e.target.value.replace(/\D/g, '');
+        let numero = parseInt(valor, 10) / 100;
+        e.target.value = formatarMoeda(numero);
       }
+    });
+
+    // Quando o campo ganha foco, seleciona todo o texto para facilitar edição
+    input.addEventListener('focus', function (e) {
+      e.target.select();
     });
   </script>
 

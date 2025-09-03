@@ -37,9 +37,13 @@ class GoogleSheetsService:
                 "Método Pagamento", "Categoria", "Data", "Data Registro"
             ])
 
+        # Garante que o valor é float
+        valor_float = float(transaction.value) if not isinstance(transaction.value,
+                                                                 float) else transaction.value
+
         worksheet.append_row([
             transaction.id,
-            float(transaction.value),
+            valor_float,  # Já está como float
             transaction.transaction_type,
             transaction.description,
             transaction.payment_method,
@@ -97,8 +101,8 @@ class GoogleSheetsService:
 
     def get_transactions(self, year, month):
         """Retorna todas transações de um mês"""
+        sheet_name = f"{month:02d}-{year}"
         try:
-            sheet_name = f"{month:02d}-{year}"
             sheet = self.client.open("Financeiro").worksheet(sheet_name)
             data = sheet.get_all_records()
 
@@ -106,12 +110,21 @@ class GoogleSheetsService:
             for row in data:
                 # Formata o valor corretamente
                 valor = row.get('Valor', 0)
-                if isinstance(valor, (int, float)):
-                    valor_formatado = f"R$ {valor:,.2f}".replace(',', 'X').replace('.',
-                                                                                   ',').replace(
-                        'X', '.')
-                else:
-                    valor_formatado = f"R$ {valor}"
+
+                # Se for string, converte para float primeiro
+                if isinstance(valor, str):
+                    # Remove possíveis formatações
+                    valor_limpo = valor.replace('R$', '').replace('.', '').replace(',',
+                                                                                   '.').strip()
+                    try:
+                        valor = float(valor_limpo)
+                    except ValueError:
+                        valor = 0.0
+
+                # Formata como moeda brasileira
+                valor_formatado = f"R$ {valor:,.2f}"
+                valor_formatado = valor_formatado.replace(',', 'X').replace('.', ',').replace('X',
+                                                                                              '.')
 
                 transactions.append({
                     "id": row.get("ID"),
@@ -124,9 +137,6 @@ class GoogleSheetsService:
                     "data_registro": row.get("Data Registro", ""),
                 })
             return transactions
-        except gspread.WorksheetNotFound:
-            print(f"Planilha {month:02d}-{year} não encontrada")
-            return []
         except Exception as e:
             print(f"Erro ao buscar transações: {e}")
             return []

@@ -39,7 +39,9 @@ def create_transaction(request):
         # normaliza método de pagamento: só se for gasto
         payment_method = metodo if (tipo == 'gasto') else ''
 
+        print(f"Valor recebido do form: {valor}")
         valor = limpar_mascara_moeda(valor)
+        print(f"Valor convertido para float: {valor}")
 
         # Verifica se é transação de crédito e determina o mês de faturamento
         billing_month = None
