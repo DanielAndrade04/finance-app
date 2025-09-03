@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Excluir Cartão de Crédito</h1>
+
+<div class="bg-white rounded-lg shadow p-6 max-w-md mx-auto">
+  <div class="text-center mb-6">
+    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+      </svg>
+    </div>
+    <h2 class="text-xl font-semibold text-gray-800">Tem certeza que deseja excluir?</h2>
+    <p class="text-gray-600 mt-2">Esta ação não pode ser desfeita.</p>
+  </div>
+
+  <div class="bg-gray-50 p-4 rounded-lg mb-6">
+    <h3 class="font-semibold text-gray-800">{{ cartao.name }}</h3>
+    <div class="mt-2 space-y-1 text-sm text-gray-600">
+      <p>📅 Fecha: Dia {{ cartao.closing_day }}</p>
+      <p>⏰ Vence: Dia {{ cartao.due_day }}</p>
+      <p>💳 Limite: R$ {{ cartao.limit|floatformat:2 }}</p>
+    </div>
+  </div>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <div class="flex space-x-4">
+      <button type="submit" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+        Sim, Excluir
+      </button>
+      <a href="{% url 'cards' %}" class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-center">
+        Cancelar
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

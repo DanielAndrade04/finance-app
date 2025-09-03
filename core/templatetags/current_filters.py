@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django import template
+from django.template.defaultfilters import stringfilter
 
 register = template.Library()
 
@@ -53,3 +54,31 @@ def get_item(dictionary, key):
         if item[0] == key:
             return item[1]
     return ""
+
+
+@register.filter
+@stringfilter
+def format_currency(value):
+    """
+    Formata um valor como moeda brasileira: R$ 10.000,00
+    """
+    try:
+        # Converte para float
+        value_float = float(value)
+        # Formata como moeda brasileira
+        return f"R$ {value_float:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+    except (ValueError, TypeError):
+        return value
+
+
+@register.filter
+def format_currency_float(value):
+    """
+    Formata um float como moeda brasileira: R$ 10.000,00
+    """
+    try:
+        if value is None:
+            return "R$ 0,00"
+        return f"R$ {float(value):,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+    except (ValueError, TypeError):
+        return f"R$ 0,00"
